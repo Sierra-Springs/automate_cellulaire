@@ -1,39 +1,46 @@
 import random
 import time
 
+
 def newCaseAlea():
-	val = random.randrange(0, 3)
+	val = random.randrange(0, 2)
 	if val == 0:
 		return "A"
 	if val == 1:
-		return "A"
-	if val == 2:
 		return "V"
 
-def evolve(L):
-	newCA = [[] for i in range(10)]
-	size = len(newCA)
-	for i in range(size):
-		for j in range(size):
+
+def evolve(CA):
+	height = len(CA)
+	width = len(CA[0])
+	L = CA
+	L.insert(0, ["V" for i in range(width)])
+	L.append(["V" for i in range(width)])
+	for i in L:
+		i.insert(0, "V")
+		i.append("V")
+	newCA = [[] for i in range(height)]
+	for i in range(1, height+1):
+		for j in range(1, width+1):
 			if L[i][j] in ["V", "C"]:
-				newCA[i].append(L[i][j])
+				newCA[i-1].append(L[i][j])
 			elif L[i][j] == "F":
-				newCA[i].append("C")
+				newCA[i-1].append("C")
 			else:
 				voisinage = [
-											L[(i-1)%size][(j-1)%size],
-											L[(i-1)%size][j],
-											L[(i-1)%size][(j+1)%size],
-											L[i][(j-1)%size],
-											L[i][(j+1)%size],
-											L[(i+1)%size][(j-1)%size],
-											L[(i+1)%size][j],
-											L[(i+1)%size][(j+1)%size]
+											L[(i-1)][(j-1)],
+											L[(i-1)][j],
+											L[(i-1)][(j+1)],
+											L[i][(j-1)],
+											L[i][(j+1)],
+											L[(i+1)][(j-1)],
+											L[(i+1)][j],
+											L[(i+1)][(j+1)]
 										]
 				if "F" in voisinage:
-					newCA[i].append("F")
+					newCA[i-1].append("F")
 				else:
-					newCA[i].append(L[i][j])
+					newCA[i-1].append(L[i][j])
 	return newCA
 		
 
@@ -52,20 +59,27 @@ def export_html(L, file):
 	with open(file+".html", "w") as fichier:
 		fichier.write(html)
 
-
-AC = [[newCaseAlea() for i in range (10)] for j in range (10)]
-AC[random.randrange(0, 10)][random.randrange(0, 10)] = "F"
+height = 14
+width = 35
+AC = [[newCaseAlea() for i in range (width)] for j in range (height)]
+AC[random.randrange(0, height)][random.randrange(0, width)] = "F"
 print(AC)
 
-for i in range(10):
-	export_html(AC, "./view/export"+str(i))
+
+nFrame = 0
+
+while "F" in [AC[i][j] for i in range(len(AC)) for j in range(len(AC[i]))]:
+	export_html(AC, "./view/export"+str(nFrame))
 	AC = evolve(AC)
+	nFrame += 1
+export_html(AC, "./view/export"+str(nFrame))
+print(nFrame)
 
 # ouverture html :
 import ui,os
 from urllib.parse import urljoin
 import webbrowser
-for i in range(10):
+for i in range(nFrame+1):
 	file_path = "./view/export"+str(i)+".html"
 	file_path = urljoin('file://', os.path.abspath(file_path))
 	#print(file_path)
