@@ -47,7 +47,9 @@ def evolve(AC):
 colors = {'A': "#32c73f", 'V':"#000000", 'F': "#f9d13e", 'C': "#a4a4a4"}
 def export_html(L, file):
 	html = "<!doctype html>\n"+"<html>\n"+"	<head>\n"
-	html += '		<meta charset="utf-8">\n'+"	</head>\n"
+	html += '		<meta charset="utf-8">\n'
+	html += "<style>*{zoom: 75%;}</style>"
+	html += "	</head>\n"
 	html += "	<body>\n"+'		<table border="0">\n'
 	for i in L:
 		html += "			<tr>\n"
@@ -59,8 +61,8 @@ def export_html(L, file):
 	with open(file+".html", "w") as fichier:
 		fichier.write(html)
 
-height = 14
-width = 35
+height = 50
+width = 100
 AC = [[newCaseAlea() for i in range (width)] for j in range (height)]
 AC[random.randrange(0, height)][random.randrange(0, width)] = "F"
 print(AC)
