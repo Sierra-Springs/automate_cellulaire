@@ -10,22 +10,22 @@ def newCaseAlea():
 		return "V"
 
 
-def evolve(CA):
-	height = len(CA)
-	width = len(CA[0])
-	L = CA
+def evolve(AC):
+	height = len(AC)
+	width = len(AC[0])
+	L = AC
 	L.insert(0, ["V" for i in range(width)])
 	L.append(["V" for i in range(width)])
 	for i in L:
 		i.insert(0, "V")
 		i.append("V")
-	newCA = [[] for i in range(height)]
+	newAC = [[] for i in range(height)]
 	for i in range(1, height+1):
 		for j in range(1, width+1):
 			if L[i][j] in ["V", "C"]:
-				newCA[i-1].append(L[i][j])
+				newAC[i-1].append(L[i][j])
 			elif L[i][j] == "F":
-				newCA[i-1].append("C")
+				newAC[i-1].append("C")
 			else:
 				voisinage = [
 											L[(i-1)][(j-1)],
@@ -38,10 +38,10 @@ def evolve(CA):
 											L[(i+1)][(j+1)]
 										]
 				if "F" in voisinage:
-					newCA[i-1].append("F")
+					newAC[i-1].append("F")
 				else:
-					newCA[i-1].append(L[i][j])
-	return newCA
+					newAC[i-1].append(L[i][j])
+	return newAC
 		
 
 colors = {'A': "#32c73f", 'V':"#000000", 'F': "#f9d13e", 'C': "#a4a4a4"}
