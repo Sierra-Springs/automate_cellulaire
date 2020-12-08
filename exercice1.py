@@ -2,12 +2,20 @@ import random
 import time
 
 
-def newCaseAlea():
-	val = random.uniform(0, 1)
-	if val < 0.05:
-		return "ZI"
-	else:
-		return "NU"
+def genRestricted(AC):
+	global width, height
+	restrictedFactor = 1
+	for step in range((restrictedFactor*width*height)//300):
+		i, j = random.randrange(0, height), random.randrange(0, width)
+		AC[i][j] = "ZI"
+		for step in range(random.randrange(5, 70)):
+			change = 2*random.randrange(0,2)-1
+			dir = random.randrange(0, 2)
+			if dir == 0:
+				j = (j+change)%width
+			else:
+				i = (i+change)%height
+			AC[i][j] = "ZI"
 
 
 def genUrban(AC):
@@ -15,13 +23,14 @@ def genUrban(AC):
 	for i in range((5*height//10), (6*height//10)):
 		for j in range((5*width//10), (6*width//10)):
 			AC[i][j] = "U"
+			
 
 
 def genRoad(AC):
 	global width, height
-	chanceOfChange = 0.10
-	roadPercent = 15
-	dir = 0
+	chanceOfChange = 0.1
+	roadPercent = 10
+	dir = random.randrange(0,4)
 	#i, j = random.randrange(0, height), random.randrange(0, width)
 	i, j = height//2, width//2
 	AC[i][j] = "R"
@@ -29,9 +38,10 @@ def genRoad(AC):
 		if random.uniform(0,1) < chanceOfChange:
 			change = 2*random.randrange(0,2)-1
 			dir = (dir+change)%4
-			chanceOfChange -= 0.5
+			chanceOfChange -= 1
 		else:
-			chanceOfChange += 0.05
+			if chanceOfChange < 0.1:
+				chanceOfChange += 0.05
 		if dir == 0:
 			j = (j+1)%width
 		elif dir == 1:
@@ -44,7 +54,8 @@ def genRoad(AC):
 
 
 def genAC(width, height):
-	AC = [[newCaseAlea() for i in range (width)] for j in range (height)]
+	AC = [["NU" for i in range (width)] for j in range (height)]
+	genRestricted(AC)
 	genUrban(AC)
 	genRoad(AC)
 	return AC
@@ -61,28 +72,30 @@ def rule2(voisinage):
 def evolve(AC):
 	global width, height, rule
 	L = AC
-	L.insert(0, ["ZI" for i in range(width)])
-	L.append(["ZI" for i in range(width)])
-	for i in L:
-		i.insert(0, "ZI")
-		i.append("ZI")
+	for step in range(rule):
+		L.insert(0, ["ZI" for i in range(len(L[0]))])
+		L.append(["ZI" for i in range(len(L[0]))])
+		for i in L:
+			i.insert(0, "ZI")
+			i.append("ZI")
 	newAC = [[] for i in range(height)]
 	size = 10
-	for i in range(1, height+1):
-		for j in range(1, width+1):
+	for i in range(rule, height+rule):
+		for j in range(rule, width+rule):
 			if L[i][j] in ["ZI", "R", "U"]:
-				newAC[i-1].append(L[i][j])
+				newAC[i-rule].append(L[i][j])
 			else:
-				voisinage = [L[a][b] for a in range(i-1, i+2) for b in range(j-1, j+2) if not (a == i and b == j)]
+				voisinage = [L[a][b] for a in range(i-rule, i+rule+1) for b in range(j-rule, j+rule+1) if not (a == i and b == j)]
 				if (rule == 1 and rule1(voisinage)) or (rule == 2 and rule2(voisinage)):
-					newAC[i-1].append("U")
+					newAC[i-rule].append("U")
 				else:
-					newAC[i-1].append(L[i][j])
+					newAC[i-rule].append(L[i][j])
 	return newAC
 		
 
 colors = {'U': "#f26200", 'NU':"#ffda55", 'ZI': "#dc00e6", 'R': "#818181"}
 def export_html(L, file):
+	'''exporte la simulation pour affichage'''
 	html = "<!doctype html>\n"+"<html>\n"+"	<head>\n"
 	html += '		<meta charset="utf-8">\n'
 	html += "<style>*{zoom: 75%;}</style>"
@@ -97,10 +110,11 @@ def export_html(L, file):
 	with open(file+".html", "w") as fichier:
 		fichier.write(html)
 
-
-rule = 2
-height = 50#22
-width = 100#42
+rule = 0
+while not rule in [1, 2]:
+	rule = int(input('saisir le numero de la règle a utiliser (1 ou 2) : '))
+height = 50
+width = 100
 AC = genAC(width, height)
 prevAC = []
 i = 0
@@ -110,7 +124,7 @@ while AC != prevAC:
 	AC = evolve(AC)
 	i += 1
 
-# ouverture html :
+# affichage de la simulation :
 import ui,os
 from urllib.parse import urljoin
 import webbrowser
