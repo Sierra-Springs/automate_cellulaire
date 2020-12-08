@@ -1,46 +1,92 @@
 import random
 import time
 
+
 def newCaseAlea():
 	val = random.uniform(0, 1)
-	if val < 0.30:
-		return "U"
-	if 0.30 <= val and val < 0.70:
-		return "NU"
-	if 0.70 <= val and val < 0.90 :
+	if val < 0.05:
 		return "ZI"
-	if val >= 0.90:
-		return "R"
+	else:
+		return "NU"
 
 
-def evolve(CA):
-	height = len(CA)
-	width = len(CA[0])
-	L = CA
+def genUrban(AC):
+	global width, height
+	for i in range((5*height//10), (6*height//10)):
+		for j in range((5*width//10), (6*width//10)):
+			AC[i][j] = "U"
+
+
+def genRoad(AC):
+	global width, height
+	chanceOfChange = 0.10
+	roadPercent = 15
+	dir = 0
+	#i, j = random.randrange(0, height), random.randrange(0, width)
+	i, j = height//2, width//2
+	AC[i][j] = "R"
+	for step in range((roadPercent*width*height)//100):
+		if random.uniform(0,1) < chanceOfChange:
+			change = 2*random.randrange(0,2)-1
+			dir = (dir+change)%4
+			chanceOfChange -= 0.5
+		else:
+			chanceOfChange += 0.05
+		if dir == 0:
+			j = (j+1)%width
+		elif dir == 1:
+			i = (i-1)%height
+		elif dir == 2:
+			j = (j-1)%width
+		elif dir == 3:
+			i = (i+1)%height
+		AC[i][j] = "R"
+
+
+def genAC(width, height):
+	AC = [[newCaseAlea() for i in range (width)] for j in range (height)]
+	genUrban(AC)
+	genRoad(AC)
+	return AC
+
+
+def rule1(voisinage):
+	return voisinage.count("U") >= 3
+
+
+def rule2(voisinage):
+	return voisinage.count("U") >= 2 and voisinage.count("R") >= 1
+
+
+def evolve(AC):
+	global width, height, rule
+	L = AC
 	L.insert(0, ["ZI" for i in range(width)])
 	L.append(["ZI" for i in range(width)])
 	for i in L:
 		i.insert(0, "ZI")
 		i.append("ZI")
-	newCA = [[] for i in range(height)]
+	newAC = [[] for i in range(height)]
 	size = 10
 	for i in range(1, height+1):
 		for j in range(1, width+1):
 			if L[i][j] in ["ZI", "R", "U"]:
-				newCA[i-1].append(L[i][j])
+				newAC[i-1].append(L[i][j])
 			else:
-				voisinage = [L[a%height][b%width] for a in range(i-1, i+2) for b in range(j-1, j+2) if not (a == i and b == j)]
-				if voisinage.count("U") >= 3:
-					newCA[i-1].append("U")
+				voisinage = [L[a][b] for a in range(i-1, i+2) for b in range(j-1, j+2) if not (a == i and b == j)]
+				if (rule == 1 and rule1(voisinage)) or (rule == 2 and rule2(voisinage)):
+					newAC[i-1].append("U")
 				else:
-					newCA[i-1].append(L[i][j])
-	return newCA
+					newAC[i-1].append(L[i][j])
+	return newAC
 		
 
 colors = {'U': "#f26200", 'NU':"#ffda55", 'ZI': "#dc00e6", 'R': "#818181"}
 def export_html(L, file):
 	html = "<!doctype html>\n"+"<html>\n"+"	<head>\n"
-	html += '		<meta charset="utf-8">\n'+"	</head>\n"
+	html += '		<meta charset="utf-8">\n'
+	html += "<style>*{zoom: 75%;}</style>"
+	html += "	</head>\n"
 	html += "	<body>\n"+'		<table border="0">\n'
 	for i in L:
 		html += "			<tr>\n"
@@ -52,9 +98,10 @@ def export_html(L, file):
 		fichier.write(html)
 
 
-height = 14
-width = 30
-AC = [[newCaseAlea() for i in range (width)] for j in range (height)]
+rule = 2
+height = 50#22
+width = 100#42
+AC = genAC(width, height)
 prevAC = []
 i = 0
 while AC != prevAC:
