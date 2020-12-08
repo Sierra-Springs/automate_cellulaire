@@ -42,6 +42,7 @@ import ui,os
 from urllib.parse import urljoin
 import webbrowser
 file_path = "export.html"
-file_path = urljoin('file://', os.path.abspath(file_path))
+file_path = urljoin("file://", os.path.abspath(file_path))
+file_path = ('%20').join(file_path.split(' '))
 print(file_path)
 webbrowser.open(file_path)

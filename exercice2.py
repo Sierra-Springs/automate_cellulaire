@@ -82,6 +82,6 @@ import webbrowser
 for i in range(nFrame+1):
 	file_path = "./view/export"+str(i)+".html"
 	file_path = urljoin('file://', os.path.abspath(file_path))
-	#print(file_path)
+	file_path = ('%20').join(file_path.split(' '))
 	webbrowser.open(file_path)
-	time.sleep(1)
+	time.sleep(0.5)
