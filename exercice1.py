@@ -12,29 +12,28 @@ def newCaseAlea():
 	if val == 3:
 		return "R"
 
-	
-rulesForU = [
-							["U", "U", "U", "U"],
-							["NU", "U", "U", "U"],
-							["RU", "U", "U", "U"],
-							["U", "U", "U", "ZI"]
-						]
 
 def evolve(L):
-	newCA = [[] for i in range(10)]
+	height = len(L)
+	width = len(L[0])
+	newCA = [[] for i in range(height)]
 	size = 10
-	for i in range(size):
-		for j in range(size):
+	for i in range(height):
+		for j in range(width):
 			if L[i][j] in ["ZI", "R", "U"]:
 				newCA[i].append(L[i][j])
 			else:
-				voisinage = [
+				voisinage = [	
+											L[(i-1)%size][(j-1)%size],
 											L[(i-1)%size][j],
+											L[(i-1)%size][(j+1)%size],
 											L[i][(j-1)%size],
 											L[i][(j+1)%size],
-											L[(i+1)%size][j]
+											L[(i+1)%size][(j-1)%size],
+											L[(i+1)%size][j],
+											L[(i+1)%size][(j+1)%size]
 										]
-				if sorted(voisinage) in rulesForU:
+				if voisinage.count("U") >= 3:
 					newCA[i].append("U")
 				else:
 					newCA[i].append(L[i][j])
@@ -57,7 +56,9 @@ def export_html(L, file):
 		fichier.write(html)
 
 
-AC = [[newCaseAlea() for i in range (10)] for j in range (10)]
+height = 14
+width = 35
+AC = [[newCaseAlea() for i in range (width)] for j in range (height)]
 for i in range(10):
 	export_html(AC, "./view/export"+str(i))
 	AC = evolve(AC)
@@ -70,7 +71,6 @@ for i in range(10):
 	file_path = "./view/export"+str(i)+".html"
 	file_path = urljoin('file://', os.path.abspath(file_path))
 	file_path = ('%20').join(file_path.split(' '))
-	print(file_path)
 	webbrowser.open(file_path)
 	time.sleep(1)
 	
